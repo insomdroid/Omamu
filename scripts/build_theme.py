@@ -324,6 +324,7 @@ def main() -> None:
             "name.txt", "version.txt", "credits.txt", "scheme/global.ini",
             "640x480/scheme/default.ini", "640x480/preview.png",
             "640x480/image/wall/default.png",
+            "640x480/image/wall/muxlaunch.png",
             "640x480/image/wall/muxlaunch.mp4", "640x480/image/background.mp4",
             "640x480/glyph/muxlaunch/apps.svg", "640x480/glyph/muxlaunch/collection.svg",
             "640x480/glyph/muxlaunch/config.svg", "640x480/glyph/muxlaunch/explore.svg",
