@@ -17,7 +17,7 @@ IMAGE_WALL = RESOLUTION / "image" / "wall"
 PREVIEW = RESOLUTION / "preview.png"
 OUTPUT = ROOT / "dist" / "Omamu.muxthm"
 WIDTH, HEIGHT = 640, 480
-MODULES = ("muxlaunch", "muxplore", "muxconfig", "muxcustom", "muxretro")
+MODULES = ("muxlaunch", "muxplore", "muxconfig", "muxcustom", "muxretro", "muxapp")
 BG = (16, 16, 16)
 GRID = (28, 27, 24)
 AMBER = (232, 168, 74)
@@ -430,7 +430,7 @@ def main() -> None:
             raise SystemExit("Archive incorrectly contains an extra Omamu/ parent folder")
 
     print(f"Built {OUTPUT.name} ({OUTPUT.stat().st_size} bytes)")
-    print(f"Validated metadata, {len(MODULES) + 2} scheme files, wallpapers, glyphs and archive layout.")
+    print(f"Validated metadata, {len(MODULES) + 2} scheme files, shared submenu wallpapers, glyphs and archive layout.")
 
 
 if __name__ == "__main__":
