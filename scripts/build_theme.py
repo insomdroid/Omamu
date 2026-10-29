@@ -192,6 +192,13 @@ def validate() -> None:
         except configparser.Error as exc:
             raise SystemExit(f"Invalid INI syntax in {scheme.relative_to(ROOT)}: {exc}") from exc
 
+    font = RESOLUTION / "font" / "default.ttf"
+    font_license = RESOLUTION / "font" / "OFL.txt"
+    if not font.is_file() or font.stat().st_size < 10000:
+        raise SystemExit("JetBrains Mono font is missing or unexpectedly small")
+    if not font_license.is_file() or not font_license.read_text(encoding="utf-8").strip():
+        raise SystemExit("JetBrains Mono OFL license is missing")
+
     global_parser = configparser.ConfigParser(interpolation=None)
     global_parser.read(ROOT / "scheme" / "global.ini", encoding="utf-8")
     for section, key in (("font", "FONT_LIST_SIZE"), ("terminal", "FONT_SIZE"),
@@ -232,6 +239,7 @@ def main() -> None:
             "640x480/scheme/default.ini", "640x480/preview.png",
             "640x480/image/wall/default.png",
             "640x480/glyph/muxlaunch/explore.svg",
+            "640x480/font/default.ttf", "640x480/font/OFL.txt",
         ]
         required.extend(f"640x480/scheme/{module}.ini" for module in MODULES)
         required.extend(f"640x480/image/wall/{module}.png" for module in MODULES)
