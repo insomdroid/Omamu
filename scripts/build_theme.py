@@ -290,26 +290,30 @@ def write_animated_wallpaper() -> None:
 
 
 def write_glyphs() -> None:
-    """Create crisp, pixel-inspired glyphs for the eight main-menu destinations."""
+    """Write filled, block-based pixel glyphs using the documented muOS filenames."""
     glyph_root = RESOLUTION / "glyph" / "muxlaunch"
     glyph_root.mkdir(parents=True, exist_ok=True)
-    paths = {
-        "apps": '<rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/>',
-        "collection": '<path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2"/>',
-        "config": '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/>',
-        "explore": '<circle cx="10" cy="10" r="6"/><path d="m14.5 14.5 5 5M8 12l4-4"/>',
-        "history": '<path d="M4 7V3M4 7h4"/><path d="M4.5 7a8 8 0 1 1-1 6"/><path d="M12 7v5l3 2"/>',
-        "info": '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
-        "reboot": '<path d="M12 3v9"/><path d="M7 5.5a8 8 0 1 0 10 0"/>',
-        "shutdown": '<path d="M12 3v9"/><path d="M7 5.5a8 8 0 1 0 10 0"/>',
+    # Filled rectangular blocks avoid thin SVG strokes disappearing in the grid renderer.
+    patterns = {
+        "apps": [(4,4,6,6),(14,4,6,6),(4,14,6,6),(14,14,6,6)],
+        "collection": [(3,6,18,3),(3,9,3,10),(6,16,12,3),(18,9,3,10),(7,3,8,3),(10,12,7,3)],
+        "config": [(3,4,18,3),(3,11,18,3),(3,18,18,3),(7,2,3,7),(14,9,3,7),(6,16,3,7)],
+        "explore": [(4,3,10,3),(2,6,3,9),(14,6,3,8),(5,15,9,3),(16,15,5,3),(17,17,3,4),(8,8,3,3),(11,11,3,3)],
+        "history": [(5,3,3,4),(2,6,5,3),(4,9,3,7),(7,16,4,3),(11,18,6,3),(17,15,3,4),(18,8,3,6),(12,5,3,8)],
+        "info": [(10,3,5,5),(10,10,5,8),(10,20,5,3)],
+        "reboot": [(10,2,5,10),(5,5,4,3),(3,8,3,7),(5,15,4,4),(9,18,7,3),(16,15,4,4),(18,8,3,7),(15,5,4,3)],
+        "shutdown": [(10,2,5,10),(5,5,4,3),(3,8,3,7),(5,15,4,4),(9,18,7,3),(16,15,4,4),(18,8,3,7),(15,5,4,3)],
     }
-    for name, body in paths.items():
-        svg = (
-            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" shape-rendering="crispEdges">'
-            '<g fill="none" stroke="#F4F0E8" stroke-width="2.2" stroke-linecap="square" '
-            'stroke-linejoin="miter" vector-effect="non-scaling-stroke">' + body + '</g></svg>'
+    for name, blocks in patterns.items():
+        rects = "".join(
+            f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="#F4F0E8"/>'
+            for x, y, w, h in blocks
         )
-        (glyph_root / f"{name}.svg").write_text(svg + "\n", encoding="utf-8")
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" '
+            'viewBox="0 0 24 24" shape-rendering="crispEdges">' + rects + '</svg>'
+        )
+        (glyph_root / f"{name}.svg").write_text(svg + "\\n", encoding="utf-8")
 
 
 def validate() -> None:
@@ -383,7 +387,10 @@ def main() -> None:
             "640x480/image/wall/default.png",
             "640x480/image/wall/muxlaunch.mp4",
             "640x480/image/background.mp4",
-            "640x480/glyph/muxlaunch/explore.svg",
+            "640x480/glyph/muxlaunch/apps.svg", "640x480/glyph/muxlaunch/collection.svg",
+            "640x480/glyph/muxlaunch/config.svg", "640x480/glyph/muxlaunch/explore.svg",
+            "640x480/glyph/muxlaunch/history.svg", "640x480/glyph/muxlaunch/info.svg",
+            "640x480/glyph/muxlaunch/reboot.svg", "640x480/glyph/muxlaunch/shutdown.svg",
             "640x480/font/default.ttf", "640x480/font/OFL.txt",
         ]
         required.extend(f"640x480/scheme/{module}.ini" for module in MODULES)
