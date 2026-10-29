@@ -258,7 +258,7 @@ def write_animated_wallpaper() -> None:
 
 
 def write_glyphs() -> None:
-    """Create simple original line glyphs for the eight main-menu destinations."""
+    """Create crisp, pixel-inspired glyphs for the eight main-menu destinations."""
     glyph_root = RESOLUTION / "glyph" / "muxlaunch"
     glyph_root.mkdir(parents=True, exist_ok=True)
     paths = {
@@ -273,9 +273,9 @@ def write_glyphs() -> None:
     }
     for name, body in paths.items():
         svg = (
-            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">'
-            '<g fill="none" stroke="#F4F0E8" stroke-width="1.6" stroke-linecap="square" '
-            'stroke-linejoin="miter">' + body + '</g></svg>'
+            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" shape-rendering="crispEdges">'
+            '<g fill="none" stroke="#F4F0E8" stroke-width="2.2" stroke-linecap="square" '
+            'stroke-linejoin="miter" vector-effect="non-scaling-stroke">' + body + '</g></svg>'
         )
         (glyph_root / f"{name}.svg").write_text(svg + "\n", encoding="utf-8")
 
