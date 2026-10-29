@@ -205,16 +205,48 @@ def draw_preview() -> bytearray:
     rectangle(pixels, width, 27, 8, 45, 3, CREAM, True)
     rectangle(pixels, width, 27, 14, 27, 2, AMBER, True)
     rectangle(pixels, width, 235, 9, 35, 3, AMBER, True)
-    for index, y in enumerate((47, 78, 109, 140, 171)):
+    # Eight compact grid cells with chunky, pixel-inspired glyph marks.
+    cell_w, cell_h, gap_x, gap_y = 59, 67, 7, 7
+    start_x, start_y = 10, 34
+    for index in range(8):
+        col, row = index % 4, index // 4
+        x, y = start_x + col * (cell_w + gap_x), start_y + row * (cell_h + gap_y)
         focused = index == 1
         fill = (48, 39, 25) if focused else (24, 23, 21)
-        rectangle(pixels, width, 27, y, 225, 23, fill, True)
-        if focused:
-            rectangle(pixels, width, 27, y, 3, 23, AMBER, True)
-            rectangle(pixels, width, 39, y + 10, 76, 3, CREAM, True)
+        border = AMBER if focused else (81, 64, 42)
+        rectangle(pixels, width, x, y, cell_w, cell_h, fill, True)
+        rectangle(pixels, width, x, y, cell_w, 1, border, True)
+        rectangle(pixels, width, x, y + cell_h - 1, cell_w, 1, border, True)
+        rectangle(pixels, width, x, y, 1, cell_h, border, True)
+        rectangle(pixels, width, x + cell_w - 1, y, 1, cell_h, border, True)
+        gx, gy = x + 23, y + 13
+        # Different block patterns keep the eight destinations visually distinct.
+        if index == 0:
+            for dx, dy in ((0,0),(8,0),(0,8),(8,8)): rectangle(pixels,width,gx+dx,gy+dy,6,6,AMBER if focused else CREAM,True)
+        elif index == 1:
+            rectangle(pixels,width,gx,gy+3,18,13,AMBER if focused else CREAM,True)
+            rectangle(pixels,width,gx+4,gy,8,4,AMBER if focused else CREAM,True)
+        elif index == 2:
+            rectangle(pixels,width,gx+5,gy,7,7,AMBER if focused else CREAM,True)
+            rectangle(pixels,width,gx+2,gy+7,13,3,AMBER if focused else CREAM,True)
+            rectangle(pixels,width,gx+5,gy+10,7,5,AMBER if focused else CREAM,True)
+        elif index == 3:
+            for dx,dy in ((0,0),(8,0),(0,8),(8,8)): rectangle(pixels,width,gx+dx,gy+dy,6,6,AMBER if focused else CREAM,True)
+        elif index == 4:
+            rectangle(pixels,width,gx,gy+3,18,3,AMBER if focused else CREAM,True)
+            rectangle(pixels,width,gx,gy+9,18,3,AMBER if focused else CREAM,True)
+            rectangle(pixels,width,gx,gy+15,18,3,AMBER if focused else CREAM,True)
+        elif index == 5:
+            rectangle(pixels,width,gx+6,gy,6,6,AMBER if focused else CREAM,True)
+            rectangle(pixels,width,gx+6,gy+8,6,10,AMBER if focused else CREAM,True)
+        elif index == 6:
+            rectangle(pixels,width,gx+7,gy,4,11,AMBER if focused else CREAM,True)
+            rectangle(pixels,width,gx+2,gy+9,14,4,AMBER if focused else CREAM,True)
         else:
-            rectangle(pixels, width, 39, y + 10, 64 + (index % 2) * 18, 2, MUTED, True)
-        rectangle(pixels, width, 252, y + 8, 3, 7, AMBER if focused else (69, 60, 45), True)
+            rectangle(pixels,width,gx+7,gy,4,11,AMBER if focused else CREAM,True)
+            rectangle(pixels,width,gx+2,gy+9,14,4,AMBER if focused else CREAM,True)
+        rectangle(pixels, width, x + 9, y + 43, 27 + (index % 3) * 4, 2, CREAM if focused else MUTED, True)
+        rectangle(pixels, width, x + 9, y + 49, 19 + (index % 2) * 7, 2, AMBER if focused else MUTED, True)
     line(pixels, width, 0, 197, width - 1, 197, (55, 46, 32))
     rectangle(pixels, width, 18, 206, 26, 2, AMBER, True)
     rectangle(pixels, width, 53, 206, 35, 2, MUTED, True)
