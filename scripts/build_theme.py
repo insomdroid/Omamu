@@ -313,7 +313,7 @@ def write_glyphs() -> None:
             '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" '
             'viewBox="0 0 24 24" shape-rendering="crispEdges">' + rects + '</svg>'
         )
-        (glyph_root / f"{name}.svg").write_text(svg + "\\n", encoding="utf-8")
+        (glyph_root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
 
 
 def validate() -> None:
