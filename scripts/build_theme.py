@@ -8,6 +8,7 @@ import struct
 import subprocess
 import zlib
 from pathlib import Path
+from PIL import Image, ImageOps
 from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -222,6 +223,20 @@ def draw_preview() -> bytearray:
 
 
 
+def prepare_wallpapers() -> None:
+    """Resize the repository's pixel-art wallpaper to the handheld's native resolution."""
+    source = ROOT / "Pixel Planet Over a Misty Horizon.png"
+    if not source.is_file():
+        raise SystemExit(f"Source wallpaper missing: {source.name}")
+    IMAGE_WALL.mkdir(parents=True, exist_ok=True)
+    with Image.open(source) as artwork:
+        artwork = ImageOps.fit(artwork.convert("RGB"), (WIDTH, HEIGHT),
+                               method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
+        artwork.save(IMAGE_WALL / "default.png", format="PNG", optimize=True)
+        for module in MODULES:
+            artwork.save(IMAGE_WALL / f"{module}.png", format="PNG", optimize=True)
+
+
 def write_animated_wallpaper() -> None:
     """Create a subtle, low-bitrate Omamu moving grid wallpaper."""
     output = IMAGE_WALL / "muxlaunch.mp4"
@@ -286,6 +301,9 @@ def validate() -> None:
         except configparser.Error as exc:
             raise SystemExit(f"Invalid INI syntax in {scheme.relative_to(ROOT)}: {exc}") from exc
 
+    if not (ROOT / "Pixel Planet Over a Misty Horizon.png").is_file():
+        raise SystemExit("Repository wallpaper source is missing")
+
     font = RESOLUTION / "font" / "default.ttf"
     font_license = RESOLUTION / "font" / "OFL.txt"
     if not font.is_file() or font.stat().st_size < 10000:
@@ -307,9 +325,7 @@ def validate() -> None:
 
 def main() -> None:
     validate()
-    write_png(IMAGE_WALL / "default.png", WIDTH, HEIGHT, draw_wallpaper())
-    for module in MODULES:
-        write_png(IMAGE_WALL / f"{module}.png", WIDTH, HEIGHT, draw_wallpaper(module))
+    prepare_wallpapers()
     write_png(PREVIEW, 288, 216, draw_preview())
     write_glyphs()
     write_animated_wallpaper()
@@ -323,7 +339,7 @@ def main() -> None:
             relative = path.relative_to(ROOT)
             if any(part in excluded_parts for part in relative.parts):
                 continue
-            if path.suffix == ".pyc" or relative.name == "README.md":
+            if path.suffix == ".pyc" or relative.name in ("README.md", "Pixel Planet Over a Misty Horizon.png"):
                 continue
             archive.write(path, relative.as_posix())
 
