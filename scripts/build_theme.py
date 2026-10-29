@@ -97,18 +97,8 @@ def draw_wallpaper(module: str = "default") -> bytearray:
             offset = (y * WIDTH + x) * 3
             pixels[offset:offset + 3] = bytes(shade)
 
-    # Asymmetric accent marks echo Omarchy's restrained terminal/editor palette.
-    accent_x = {"default": 48, "muxlaunch": 48, "muxplore": 586,
-                "muxconfig": 64, "muxcustom": 576, "muxretro": 48}.get(module, 48)
-    line(pixels, WIDTH, accent_x, 76, accent_x, 392, AMBER, 2)
-    line(pixels, WIDTH, 48, 346, 592, 346, (64, 48, 29), 1)
-    # Broken registration marks; intentionally low contrast, not fake UI text.
-    for x in range(80, 560, 32):
-        if (x // 32) % 3 == 0:
-            line(pixels, WIDTH, x, 70, x + 7, 70, (74, 57, 35), 1)
-    # Fine amber ticks make the accent feel like a technical instrument panel.
-    for y in range(88, 392, 24):
-        line(pixels, WIDTH, accent_x - 4, y, accent_x + 4, y, AMBER, 1)
+    # Keep wallpaper decoration behind the interface: no strokes cross list glyphs
+    # or imitate menu separators. The subdued grid remains the only texture.
     return pixels
 
 
