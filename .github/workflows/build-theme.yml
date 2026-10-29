@@ -28,6 +28,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install video encoder for animated wallpaper
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Add licensed JetBrains Mono font
         run: |
           mkdir -p 640x480/font
