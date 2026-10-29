@@ -312,9 +312,19 @@ def write_animated_wallpaper() -> None:
         "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output),
     ]
     subprocess.run(command, check=True)
+    # The global fallback video must use the submenu grid, never duplicate the main-menu planet.
     background_video = RESOLUTION / "image" / "background.mp4"
     background_video.parent.mkdir(parents=True, exist_ok=True)
-    background_video.write_bytes(output.read_bytes())
+    grid_video = [
+        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+        "-loop", "1", "-framerate", "12", "-i", str(IMAGE_WALL / "default.png"),
+        "-t", "6",
+        "-vf",
+        "drawbox=x='mod(t*10,640)':y=0:w=2:h=480:color=0xe8a84a@0.13:t=fill,format=yuv420p",
+        "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "30",
+        "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(background_video),
+    ]
+    subprocess.run(grid_video, check=True)
 
 
 def write_glyphs() -> None:
@@ -333,12 +343,16 @@ def write_glyphs() -> None:
         "shutdown": [(10,2,5,10),(5,5,4,3),(3,8,3,7),(5,15,4,4),(9,18,7,3),(16,15,4,4),(18,8,3,7),(15,5,4,3)],
     }
     for name, blocks in patterns.items():
-        # Use path geometry for reliable rendering by the muOS SDL glyph renderer.
-        paths = "".join(f"M{x} {y}h{w}v{h}h-{w}Z" for x, y, w, h in blocks)
+        # Use simple filled rect elements, matching the conservative SVG subset used by muOS glyphs.
+        rects = "".join(
+            f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="#F4F0E8"/>'
+            for x, y, w, h in blocks
+        )
         svg = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
             '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" '
             'viewBox="0 0 24 24" shape-rendering="crispEdges">'
-            f'<path d="{paths}" fill="#F4F0E8"/></svg>'
+            f'{rects}</svg>'
         )
         (glyph_root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
 
