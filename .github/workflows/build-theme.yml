@@ -17,7 +17,7 @@ jobs:
   build-theme:
     name: Validate and package Omamu
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
@@ -27,6 +27,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Add licensed JetBrains Mono font
+        run: |
+          mkdir -p 640x480/font
+          curl --fail --location --retry 3 --silent --show-error \
+            https://raw.githubusercontent.com/JetBrains/JetBrainsMono/v2.304/fonts/ttf/JetBrainsMono-Regular.ttf \
+            --output 640x480/font/default.ttf
+          curl --fail --location --retry 3 --silent --show-error \
+            https://raw.githubusercontent.com/JetBrains/JetBrainsMono/v2.304/OFL.txt \
+            --output 640x480/font/OFL.txt
+          test -s 640x480/font/default.ttf
+          test -s 640x480/font/OFL.txt
 
       - name: Validate and build .muxthm
         run: python scripts/build_theme.py
