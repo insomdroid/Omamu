@@ -402,7 +402,12 @@ def main() -> None:
             relative = path.relative_to(ROOT)
             if any(part in excluded_parts for part in relative.parts):
                 continue
-            if path.suffix == ".pyc" or relative.name in ("README.md", "Pixel Planet Over a Misty Horizon.png"):
+            if path.suffix == ".pyc" or relative.name == "README.md":
+                continue
+            # Artwork uploaded as design references belongs in the repository, not the theme.
+            # Only image assets inside the runtime theme directory (640x480/) are packaged.
+            image_suffixes = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"}
+            if path.suffix.lower() in image_suffixes and relative.parts[0] != "640x480":
                 continue
             archive.write(path, relative.as_posix())
 
