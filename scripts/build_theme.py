@@ -15,7 +15,6 @@ RESOLUTION = ROOT / "640x480"
 IMAGE_WALL = RESOLUTION / "image" / "wall"
 PREVIEW = RESOLUTION / "preview.png"
 OUTPUT = ROOT / "dist" / "Omamu.muxthm"
-BOOT_LOGO = ROOT / "dist" / "Omamu-boot-logo.bmp"
 WIDTH, HEIGHT = 640, 480
 MODULES = ("muxlaunch", "muxplore", "muxconfig", "muxcustom", "muxretro", "muxapp")
 BG = (16, 16, 16)
@@ -247,18 +246,6 @@ def prepare_wallpapers() -> None:
         grid.save(IMAGE_WALL / f"{module}.png", format="PNG", optimize=True)
 
 
-def write_boot_logo() -> None:
-    """Create a 24-bit BMP boot logo from the existing 640x480 planet wallpaper."""
-    source = ROOT / "Pixel Planet Over a Misty Horizon.png"
-    BOOT_LOGO.parent.mkdir(parents=True, exist_ok=True)
-    with Image.open(source) as artwork:
-        logo = ImageOps.fit(
-            artwork.convert("RGB"), (WIDTH, HEIGHT),
-            method=Image.Resampling.LANCZOS, centering=(0.5, 0.5),
-        )
-        logo.save(BOOT_LOGO, format="BMP")
-
-
 def write_glyphs() -> None:
     """Write filled, block-based pixel glyphs using the documented muOS filenames."""
     glyph_root = RESOLUTION / "glyph" / "muxlaunch"
@@ -337,7 +324,6 @@ def main() -> None:
     prepare_wallpapers()
     write_png(PREVIEW, 288, 216, draw_preview())
     write_glyphs()
-    write_boot_logo()
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     excluded_parts = {".git", ".github", "scripts", "dist", "__pycache__"}
@@ -382,7 +368,6 @@ def main() -> None:
             raise SystemExit("Archive incorrectly contains an extra Omamu/ parent folder")
 
     print(f"Built {OUTPUT.name} ({OUTPUT.stat().st_size} bytes)")
-    print(f"Built {BOOT_LOGO.name} ({BOOT_LOGO.stat().st_size} bytes)")
     print(f"Validated metadata, {len(MODULES) + 2} scheme files, shared submenu wallpapers, glyphs and archive layout.")
 
 
