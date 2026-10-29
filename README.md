@@ -13,6 +13,10 @@ Omamu brings Omarchy's restrained workstation aesthetic to a handheld frontend: 
 - JetBrains Mono bundled under the SIL Open Font License 1.1; the license ships inside the theme package.
 - Automated metadata, INI syntax, asset and archive-layout checks.
 
+## Preview on Windows (no device needed)
+
+Open the standalone [Omamu Preview](preview/index.html) source in GitHub, then use **Download raw file** and save it as `omamu-preview.html`. Double-click the saved file to open it in Edge, Chrome or Firefox; it runs locally and needs no installation or internet connection. It simulates the RG35XX H screen at 640×480 and lets you switch screens, adjust text size/right padding, test clock and battery colours, check inactive icons, toggle dividers, and test long labels. Use **Muat INI** to load a scheme file and preview selected values. This is a visual approximation, not the native muOS renderer, so verify the final result on-device when possible.
+
 ## Build with GitHub Actions
 
 1. Open [Actions → Build muOS theme](https://github.com/insomdroid/Omamu/actions/workflows/build-theme.yml).
