@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import configparser
-import math
 import struct
 import zlib
 from pathlib import Path
@@ -243,7 +242,7 @@ def main() -> None:
             raise SystemExit("Archive incorrectly contains an extra Omamu/ parent folder")
 
     print(f"Built {OUTPUT.name} ({OUTPUT.stat().st_size} bytes)")
-    print(f"Validated metadata, {len(schemes)} scheme files, wallpapers, glyphs and archive layout.")
+    print(f"Validated metadata, {len(MODULES) + 2} scheme files, wallpapers, glyphs and archive layout.")
 
 
 if __name__ == "__main__":
