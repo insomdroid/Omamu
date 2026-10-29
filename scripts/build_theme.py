@@ -221,9 +221,7 @@ def write_wallpaper_videos() -> None:
 
 
 def write_glyphs() -> None:
-    """Generate crisp, block-based pixel glyphs for the main menu and secondary menus."""
-    # muOS resolves glyphs by module/item name. Keep all artwork in glyph/, never
-    # image/static/: static images are screen overlays and can appear in the centre.
+    """Generate clean outline glyphs for secondary menu entries."""
     modules = {
         "muxlaunch": ("apps", "collection", "config", "explore", "history", "info", "reboot", "shutdown"),
         "muxconfig": ("access", "backup", "colour", "connect", "core", "custom", "general", "interface", "power", "storage", "theme"),
@@ -248,37 +246,31 @@ def write_glyphs() -> None:
         "muxaccess": ("boldfocus", "highcontrast", "legiblefont", "reducemotion", "textsize"),
         "muxterm": ("background", "fonthinting", "fontsize", "foreground", "quit", "reset", "terminal"),
     }
-    # 5x5 bitmap alphabet of simple, recognizable symbols; each cell becomes a
-    # hard-edged rectangle, avoiding anti-aliased strokes at 640x480.
-    bitmaps = {
-        "apps": ("10101","10101","00000","10101","10101"),
-        "folder": ("11111","10000","11110","10010","11111"),
-        "config": ("00100","10101","01110","10101","00100"),
-        "explore": ("00100","10101","01110","00100","00100"),
-        "history": ("01110","10001","10111","10001","01110"),
-        "info": ("00100","00100","00100","00000","00100"),
-        "power": ("00100","10101","10001","11011","01110"),
-        "shutdown": ("00100","00100","10101","10001","01110"),
-        "collection": ("01010","11111","11111","01110","00100"),
-        "star": ("00100","10101","01110","11111","01010"),
-        "clock": ("01110","10001","10111","10001","01110"),
-        "battery": ("11111","10001","10101","10001","11111"),
-        "bluetooth": ("10010","11100","10110","11100","10010"),
-        "network": ("00100","01010","10101","01010","00100"),
-        "theme": ("01110","11011","10101","11011","01110"),
-        "storage": ("01110","10001","11111","10001","01110"),
-        "lock": ("01110","10001","11111","11011","11111"),
-        "document": ("11110","10010","10110","10010","11110"),
-        "search": ("01110","10001","10111","01100","00110"),
-        "download": ("00100","00100","10101","01110","00100"),
-        "link": ("01001","10010","00100","01001","10010"),
-        "music": ("00110","00101","00101","11101","11110"),
-        "font": ("00100","01010","11111","10001","10001"),
-        "screen": ("11111","10001","10101","10001","11111"),
-        "wifi": ("00100","01010","10001","00100","00100"),
-        "refresh": ("01110","10001","00110","01001","01110"),
-        "archive": ("11111","10001","10101","10001","11111"),
-        "game": ("10101","11111","11011","11111","10101"),
+    icons = {
+        "apps": '<rect x="4" y="5" width="6" height="6"/><rect x="14" y="5" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/>',
+        "folder": '<path d="M3 7V5h7l2 2h9v12H3z"/>',
+        "config": '<circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9 7 7m10 10 2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>',
+        "explore": '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M13 8l-2 5-3 1 2-5z"/>',
+        "history": '<path d="M4 7V3m0 4h4M4.5 7A8.5 8.5 0 1 1 3.5 14M12 7v5l3 2"/>',
+        "info": '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/>',
+        "power": '<path d="M12 2v10"/><path d="M6.2 5.8a8 8 0 1 0 11.6 0"/>',
+        "collection": '<path d="M3 5h18v14H3zM7 9h10M7 12h10M7 15h6"/>',
+        "clock": '<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+        "battery": '<rect x="3" y="7" width="17" height="11" rx="1"/><path d="M20 10h2v5h-2M6 10v5m4-5v5m4-5v5"/>',
+        "bluetooth": '<path d="m7 7 10 10-5 5V2l5 5L7 17"/>',
+        "network": '<path d="M3 9a13 13 0 0 1 18 0M6 12a9 9 0 0 1 12 0m-9 3a4 4 0 0 1 6 0m-3 4h.01"/>',
+        "theme": '<path d="M12 3a9 9 0 1 0 0 18h2a2 2 0 0 0 0-4h-1a2 2 0 0 1 0-4h3a5 5 0 0 0 5-5c0-3-4-5-9-5z"/><circle cx="7" cy="9" r="1"/><circle cx="12" cy="6.5" r="1"/><circle cx="17" cy="9" r="1"/>',
+        "storage": '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 14h.01M11 14h.01"/>',
+        "lock": '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/>',
+        "document": '<path d="M6 3h8l4 4v14H6zM14 3v5h5M9 12h6m-6 4h6"/>',
+        "search": '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/>',
+        "download": '<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>',
+        "link": '<path d="M9 15 7 17a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m4 2 2-2a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0m-6-1 8-8"/>',
+        "music": '<path d="M9 18V5l12-2v13M9 9l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/>',
+        "font": '<path d="M3 20 10 4h4l7 16M6 14h12"/>',
+        "screen": '<rect x="3" y="4" width="18" height="13" rx="1"/><path d="M8 21h8m-4-4v4"/>',
+        "refresh": '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.5-3"/>',
+        "game": '<path d="M7 8h10a5 5 0 0 1 4.8 6.5l-1 3A2 2 0 0 1 17 18l-3-3h-4l-3 3a2 2 0 0 1-3.8-.5l-1-3A5 5 0 0 1 7 8zM7 11v4m-2-2h4m7-1h.01m3 2h.01"/>',
     }
     def symbol_for(name: str) -> str:
         key = name.lower()
@@ -305,20 +297,36 @@ def write_glyphs() -> None:
         glyph_root = RESOLUTION / "glyph" / module
         glyph_root.mkdir(parents=True, exist_ok=True)
         for name in names:
-            symbol = bitmaps[symbol_for(name)]
-            cells = []
-            for row, bits in enumerate(symbol):
-                for col, bit in enumerate(bits):
-                    if bit == "1":
-                        cells.append(f'<rect x="{3 + col * 4}" y="{3 + row * 4}" width="3" height="3" fill="#F4F0E8"/>')
-            # Tiny amber corner pixels give the set a consistent Omamu accent.
-            cells.append('<rect x="19" y="19" width="3" height="3" fill="#E8A84A"/>')
+            symbol = icons[symbol_for(name)]
             svg = ('<?xml version="1.0" encoding="UTF-8"?>'
                    '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" '
-                   'viewBox="0 0 24 24" shape-rendering="crispEdges">'
-                   + ''.join(cells) + '</svg>')
+                   'viewBox="0 0 24 24" fill="none" stroke="#F4F0E8" stroke-width="1.7" '
+                   'stroke-linecap="round" stroke-linejoin="round">'
+                   + symbol + '</svg>')
             (glyph_root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
 
+
+def write_grid_icons() -> None:
+    """Write native main-menu tile artwork in muOS's grid image directory."""
+    icons = {
+        "apps": '<rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/>',
+        "collection": '<path d="M4 5h16v15H4zM8 9h8M8 12h8M8 15h5"/>',
+        "config": '<circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4M5 5l3 3m8 8 3 3m0-14-3 3M8 16l-3 3"/>',
+        "explore": '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5m-7-13-2 5-3 2 2-5z"/>',
+        "history": '<path d="M4 7V3m0 4h4M4.5 7A8.5 8.5 0 1 1 3.5 14M12 7v5l3 2"/>',
+        "info": '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/>',
+        "reboot": '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.5-3"/>',
+        "shutdown": '<path d="M12 2v10"/><path d="M6.2 5.8a8 8 0 1 0 11.6 0"/>',
+    }
+    root = RESOLUTION / "image" / "grid" / "muxlaunch"
+    root.mkdir(parents=True, exist_ok=True)
+    for name, paths in icons.items():
+        svg = ('<?xml version="1.0" encoding="UTF-8"?>'
+               '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" '
+               'viewBox="0 0 24 24" fill="none" stroke="#F4F0E8" stroke-width="1.6" '
+               'stroke-linecap="round" stroke-linejoin="round">'
+               + paths + '</svg>')
+        (root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
 
 def validate() -> None:
     for filename in ("name.txt", "version.txt", "credits.txt"):
@@ -368,6 +376,7 @@ def main() -> None:
     prepare_wallpapers()
     write_png(PREVIEW, 288, 216, draw_preview())
     write_glyphs()
+    write_grid_icons()
     write_wallpaper_videos()
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
