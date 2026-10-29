@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import configparser
 import struct
+import subprocess
 import zlib
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -138,6 +139,27 @@ def draw_preview() -> bytearray:
     return pixels
 
 
+
+def write_animated_wallpaper() -> None:
+    """Create a subtle, low-bitrate Omamu moving grid wallpaper."""
+    output = IMAGE_WALL / "muxlaunch.mp4"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    command = [
+        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+        "-f", "lavfi", "-i", "color=c=0x101010:s=640x480:r=12:d=6",
+        "-vf",
+        "drawgrid=width=32:height=32:thickness=1:color=0x1c1b18@0.72,"
+        "drawbox=x='mod(t*18,640)':y=0:w=2:h=480:color=0xe8a84a@0.16:t=fill,"
+        "format=yuv420p",
+        "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "30",
+        "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output),
+    ]
+    subprocess.run(command, check=True)
+    background_video = RESOLUTION / "image" / "background.mp4"
+    background_video.parent.mkdir(parents=True, exist_ok=True)
+    background_video.write_bytes(output.read_bytes())
+
+
 def write_glyphs() -> None:
     """Create simple original line glyphs for the eight main-menu destinations."""
     glyph_root = RESOLUTION / "glyph" / "muxlaunch"
@@ -155,7 +177,7 @@ def write_glyphs() -> None:
     for name, body in paths.items():
         svg = (
             '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">'
-            '<g fill="none" stroke="#E8A84A" stroke-width="1.6" stroke-linecap="square" '
+            '<g fill="none" stroke="#F4F0E8" stroke-width="1.6" stroke-linecap="square" '
             'stroke-linejoin="miter">' + body + '</g></svg>'
         )
         (glyph_root / f"{name}.svg").write_text(svg + "\n", encoding="utf-8")
@@ -208,6 +230,7 @@ def main() -> None:
         write_png(IMAGE_WALL / f"{module}.png", WIDTH, HEIGHT, draw_wallpaper(module))
     write_png(PREVIEW, 288, 216, draw_preview())
     write_glyphs()
+    write_animated_wallpaper()
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     excluded_parts = {".git", ".github", "scripts", "dist", "__pycache__"}
@@ -228,6 +251,8 @@ def main() -> None:
             "name.txt", "version.txt", "credits.txt", "scheme/global.ini",
             "640x480/scheme/default.ini", "640x480/preview.png",
             "640x480/image/wall/default.png",
+            "640x480/image/wall/muxlaunch.mp4",
+            "640x480/image/background.mp4",
             "640x480/glyph/muxlaunch/explore.svg",
             "640x480/font/default.ttf", "640x480/font/OFL.txt",
         ]
