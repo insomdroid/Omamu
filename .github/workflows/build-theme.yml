@@ -1,0 +1,41 @@
+name: Build muOS theme
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omamu-theme-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-theme:
+    name: Validate and package Omamu
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate and build .muxthm
+        run: python scripts/build_theme.py
+
+      - name: Upload theme package
+        uses: actions/upload-artifact@v4
+        with:
+          name: omamu-muxthm
+          path: dist/Omamu.muxthm
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
