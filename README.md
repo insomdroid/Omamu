@@ -8,7 +8,9 @@ Omamu brings Omarchy's restrained workstation aesthetic to a handheld frontend: 
 
 - Global palette for backgrounds, headers, footers, lists, dialogs, keyboard, notifications, volume/brightness bars and counters.
 - RG35XX H-specific schemes for Main Menu, Explore Content, Configuration, Customisation and Pickles/Retro settings.
-- Original per-screen grid wallpapers and a matching theme preview, generated during CI.
+- Original per-screen grid wallpapers, a subtle optional animated video wallpaper, and a matching preview generated during CI.
+- Main-menu grid layout with two rows of four items, cream line glyphs and amber focus styling.
+- A standalone Windows-friendly live preview at [`preview/index.html`](preview/index.html) with layout, spacing, footer and colour controls.
 - Original amber line glyphs for the main-menu destinations.
 - JetBrains Mono bundled under the SIL Open Font License 1.1; the license ships inside the theme package.
 - Automated metadata, INI syntax, asset and archive-layout checks.
