@@ -178,8 +178,8 @@ def validate() -> None:
             raise SystemExit(f"Required theme metadata missing or empty: {filename}")
 
     version = (ROOT / "version.txt").read_text(encoding="utf-8").strip()
-    if len(version.split(".")) != 3 or not all(part.isdigit() for part in version.split(".")):
-        raise SystemExit("version.txt must use numeric MAJOR.MINOR.PATCH format")
+    if len(version.split(".")) not in (2, 3) or not all(part.isdigit() for part in version.split(".")):
+        raise SystemExit("version.txt must use the numeric muOS release format (for example 2606.0)")
 
     schemes = [ROOT / "scheme" / "global.ini", RESOLUTION / "scheme" / "default.ini"]
     schemes.extend(RESOLUTION / "scheme" / f"{module}.ini" for module in MODULES)
