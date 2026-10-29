@@ -11,7 +11,6 @@ Omamu brings a restrained, workstation-inspired look to the muOS frontend: near-
 - **RG35XX H layout:** resolution-specific schemes for the main menu and supported muOS screens.
 - **Main-menu grid:** two rows of four destinations with custom line glyphs and clear focus styling.
 - **Pixel-art wallpaper:** uses the existing source artwork for the main menu and generates matching static submenu backgrounds.
-- **Boot logo:** a separate 640 × 480, 24-bit BMP is generated from the same wallpaper for manual installation through muOS.
 - **Artwork keeps its colour:** box art and image previews are not recoloured by the theme.
 - **Native dialog colours:** the Download Theme dialog is intended to retain its normal muOS colours instead of receiving a theme tint.
 - **JetBrains Mono:** bundled during the build under the SIL Open Font License 1.1; the license is included in the package.
@@ -35,9 +34,7 @@ The theme package is built by GitHub Actions; you do not need a local Linux envi
 4. Download the **omamu-muxthm** artifact and extract it.
 5. The installable theme file is **Omamu.muxthm**.
 
-To use the matching boot logo, download **omamu-boot-logo**, copy **Omamu-boot-logo.bmp** to `MUOS/logo` on the SD card, then select it in **Configuration → Customisation → Boot Logo**. This is a static logo, not a boot animation.
-
-The workflow generates static wallpaper assets, prepares the font and its license, validates theme files, and packages the output. It publishes two artifacts: **omamu-muxthm** (the installable theme) and **omamu-boot-logo** (the BMP boot logo).
+The workflow generates static wallpaper assets, prepares the font and its license, validates theme files, and packages the output. It publishes the **omamu-muxthm** artifact containing the installable theme.
 
 ## Install on muOS
 
