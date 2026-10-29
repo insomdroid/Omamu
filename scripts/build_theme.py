@@ -307,25 +307,24 @@ def write_glyphs() -> None:
 
 
 def write_grid_icons() -> None:
-    """Write native main-menu tile artwork in muOS's grid image directory."""
+    """Write distinct, block-pixel artwork for the eight native main-menu tiles."""
     icons = {
-        "apps": '<rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/>',
-        "collection": '<path d="M4 5h16v15H4zM8 9h8M8 12h8M8 15h5"/>',
-        "config": '<circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4M5 5l3 3m8 8 3 3m0-14-3 3M8 16l-3 3"/>',
-        "explore": '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5m-7-13-2 5-3 2 2-5z"/>',
-        "history": '<path d="M4 7V3m0 4h4M4.5 7A8.5 8.5 0 1 1 3.5 14M12 7v5l3 2"/>',
-        "info": '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/>',
-        "reboot": '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.5-3"/>',
-        "shutdown": '<path d="M12 2v10"/><path d="M6.2 5.8a8 8 0 1 0 11.6 0"/>',
-    }
+        'apps': '<rect x=\'4\' y=\'5\' width=\'5\' height=\'5\'/><rect x=\'15\' y=\'5\' width=\'5\' height=\'5\'/><rect x=\'4\' y=\'16\' width=\'5\' height=\'5\'/><rect x=\'15\' y=\'16\' width=\'5\' height=\'5\'/>',
+        'collection': '<rect x=\'4\' y=\'5\' width=\'16\' height=\'3\'/><rect x=\'4\' y=\'9\' width=\'3\' height=\'10\'/><rect x=\'17\' y=\'9\' width=\'3\' height=\'10\'/><rect x=\'7\' y=\'16\' width=\'10\' height=\'3\'/><rect x=\'8\' y=\'11\' width=\'8\' height=\'2\'/>',
+        'config': '<rect x=\'10\' y=\'3\' width=\'4\' height=\'4\'/><rect x=\'10\' y=\'17\' width=\'4\' height=\'4\'/><rect x=\'3\' y=\'10\' width=\'4\' height=\'4\'/><rect x=\'17\' y=\'10\' width=\'4\' height=\'4\'/><rect x=\'7\' y=\'7\' width=\'10\' height=\'10\'/><rect x=\'10\' y=\'10\' width=\'4\' height=\'4\' fill=\'#101010\'/>',
+        'explore': '<rect x=\'4\' y=\'4\' width=\'3\' height=\'3\'/><rect x=\'7\' y=\'7\' width=\'3\' height=\'3\'/><rect x=\'10\' y=\'10\' width=\'3\' height=\'3\'/><rect x=\'13\' y=\'13\' width=\'3\' height=\'3\'/><rect x=\'16\' y=\'16\' width=\'4\' height=\'4\'/><rect x=\'13\' y=\'5\' width=\'5\' height=\'3\'/><rect x=\'5\' y=\'13\' width=\'3\' height=\'5\'/>',
+        'history': '<rect x=\'4\' y=\'4\' width=\'4\' height=\'3\'/><rect x=\'2\' y=\'7\' width=\'3\' height=\'4\'/><rect x=\'4\' y=\'17\' width=\'4\' height=\'3\'/><rect x=\'8\' y=\'19\' width=\'8\' height=\'2\'/><rect x=\'16\' y=\'17\' width=\'4\' height=\'3\'/><rect x=\'18\' y=\'8\' width=\'3\' height=\'7\'/><rect x=\'10\' y=\'7\' width=\'3\' height=\'6\'/><rect x=\'12\' y=\'12\' width=\'5\' height=\'3\'/>',
+        'info': '<rect x=\'5\' y=\'3\' width=\'14\' height=\'3\'/><rect x=\'3\' y=\'6\' width=\'3\' height=\'12\'/><rect x=\'18\' y=\'6\' width=\'3\' height=\'12\'/><rect x=\'5\' y=\'18\' width=\'14\' height=\'3\'/><rect x=\'10\' y=\'9\' width=\'4\' height=\'3\'/><rect x=\'10\' y=\'13\' width=\'4\' height=\'5\'/>',
+        'reboot': '<rect x=\'11\' y=\'3\' width=\'4\' height=\'3\'/><rect x=\'16\' y=\'5\' width=\'3\' height=\'3\'/><rect x=\'18\' y=\'8\' width=\'3\' height=\'6\'/><rect x=\'15\' y=\'14\' width=\'6\' height=\'3\'/><rect x=\'6\' y=\'17\' width=\'10\' height=\'3\'/><rect x=\'3\' y=\'14\' width=\'3\' height=\'4\'/><rect x=\'3\' y=\'8\' width=\'3\' height=\'6\'/><rect x=\'6\' y=\'5\' width=\'4\' height=\'3\'/>',
+        'shutdown': '<rect x=\'10\' y=\'3\' width=\'4\' height=\'9\'/><rect x=\'6\' y=\'6\' width=\'3\' height=\'3\'/><rect x=\'4\' y=\'9\' width=\'3\' height=\'7\'/><rect x=\'6\' y=\'16\' width=\'3\' height=\'3\'/><rect x=\'9\' y=\'18\' width=\'6\' height=\'3\'/><rect x=\'15\' y=\'16\' width=\'3\' height=\'3\'/><rect x=\'17\' y=\'9\' width=\'3\' height=\'7\'/><rect x=\'15\' y=\'6\' width=\'3\' height=\'3\'/>'
+}
     root = RESOLUTION / "image" / "grid" / "muxlaunch"
     root.mkdir(parents=True, exist_ok=True)
-    for name, paths in icons.items():
+    for name, artwork in icons.items():
         svg = ('<?xml version="1.0" encoding="UTF-8"?>'
                '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" '
-               'viewBox="0 0 24 24" fill="none" stroke="#F4F0E8" stroke-width="1.6" '
-               'stroke-linecap="round" stroke-linejoin="round">'
-               + paths + '</svg>')
+               'viewBox="0 0 24 24" fill="#F4F0E8">'
+               '<g transform="translate(0 1.5)">' + artwork + '</g></svg>')
         (root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
 
 def validate() -> None:
@@ -375,7 +374,6 @@ def main() -> None:
     validate()
     prepare_wallpapers()
     write_png(PREVIEW, 288, 216, draw_preview())
-    write_glyphs()
     write_grid_icons()
     write_wallpaper_videos()
 
@@ -405,10 +403,6 @@ def main() -> None:
             "640x480/image/wall/default.png",
             "640x480/image/wall/muxlaunch.png",
             "640x480/image/wall/muxlaunch.mp4", "640x480/image/background.mp4",
-            "640x480/glyph/muxlaunch/apps.svg", "640x480/glyph/muxlaunch/collection.svg",
-            "640x480/glyph/muxlaunch/config.svg", "640x480/glyph/muxlaunch/explore.svg",
-            "640x480/glyph/muxlaunch/history.svg", "640x480/glyph/muxlaunch/info.svg",
-            "640x480/glyph/muxlaunch/reboot.svg", "640x480/glyph/muxlaunch/shutdown.svg",
             "640x480/font/default.ttf", "640x480/font/OFL.txt",
         ]
         required.extend(f"640x480/scheme/{module}.ini" for module in MODULES)
@@ -420,7 +414,7 @@ def main() -> None:
             raise SystemExit("Archive incorrectly contains an extra Omamu/ parent folder")
 
     print(f"Built {OUTPUT.name} ({OUTPUT.stat().st_size} bytes)")
-    print(f"Validated metadata, {len(MODULES) + 2} scheme files, shared submenu wallpapers, glyphs and archive layout.")
+    print(f"Validated metadata, {len(MODULES) + 2} scheme files, wallpapers, grid artwork and archive layout.")
 
 
 if __name__ == "__main__":
