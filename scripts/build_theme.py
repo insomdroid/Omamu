@@ -255,18 +255,46 @@ def draw_preview() -> bytearray:
 
 
 
+def draw_submenu_wallpaper() -> Image.Image:
+    """Create the original near-black grid background used for secondary screens."""
+    pixels = bytearray(WIDTH * HEIGHT * 3)
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            # Subtle 32 px grid, matching the project's original dark-grid concept.
+            colour = GRID if x % 32 == 0 or y % 32 == 0 else BG
+            offset = (y * WIDTH + x) * 3
+            pixels[offset:offset + 3] = bytes(colour)
+
+    image = Image.frombytes("RGB", (WIDTH, HEIGHT), bytes(pixels))
+    from PIL import ImageDraw
+    draw = ImageDraw.Draw(image)
+    # Restrained amber HUD corners keep the grid atmospheric without competing with menus.
+    amber = AMBER
+    for x0, y0, x1, y1 in ((24, 30, 62, 30), (24, 30, 24, 92),
+                            (578, 30, 616, 30), (616, 30, 616, 92)):
+        draw.line((x0, y0, x1, y1), fill=amber, width=2)
+    for y in (104, 112, 120):
+        draw.rectangle((24, y, 26, y + 2), fill=amber)
+        draw.rectangle((613, y, 615, y + 2), fill=amber)
+    return image
+
+
 def prepare_wallpapers() -> None:
-    """Resize the repository's pixel-art wallpaper to the handheld's native resolution."""
+    """Use the planet on the main menu and the original dark grid on submenu screens."""
     source = ROOT / "Pixel Planet Over a Misty Horizon.png"
     if not source.is_file():
         raise SystemExit(f"Source wallpaper missing: {source.name}")
     IMAGE_WALL.mkdir(parents=True, exist_ok=True)
+    grid = draw_submenu_wallpaper()
+    grid.save(IMAGE_WALL / "default.png", format="PNG", optimize=True)
     with Image.open(source) as artwork:
         artwork = ImageOps.fit(artwork.convert("RGB"), (WIDTH, HEIGHT),
                                method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
-        artwork.save(IMAGE_WALL / "default.png", format="PNG", optimize=True)
-        for module in MODULES:
-            artwork.save(IMAGE_WALL / f"{module}.png", format="PNG", optimize=True)
+        artwork.save(IMAGE_WALL / "muxlaunch.png", format="PNG", optimize=True)
+    for module in MODULES:
+        if module == "muxlaunch":
+            continue
+        grid.save(IMAGE_WALL / f"{module}.png", format="PNG", optimize=True)
 
 
 def write_animated_wallpaper() -> None:
