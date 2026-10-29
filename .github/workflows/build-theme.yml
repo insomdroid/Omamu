@@ -28,9 +28,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install video encoder for animated wallpaper
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
       - name: Install image processing dependency
         run: python -m pip install --disable-pip-version-check Pillow
 
@@ -54,6 +51,15 @@ jobs:
         with:
           name: omamu-muxthm
           path: dist/Omamu.muxthm
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload boot logo
+        uses: actions/upload-artifact@v4
+        with:
+          name: omamu-boot-logo
+          path: dist/Omamu-boot-logo.bmp
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
