@@ -250,6 +250,36 @@ def write_glyphs() -> None:
         (glyph_root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
 
 
+
+def write_home_tile_art() -> None:
+    """Use MustardOS's native per-item static artwork path for the main-menu grid."""
+    from PIL import ImageDraw
+
+    folder = RESOLUTION / "image" / "static" / "muxlaunch"
+    folder.mkdir(parents=True, exist_ok=True)
+    cream = (244, 240, 232, 255)
+    amber = (232, 168, 74, 255)
+
+    # Names follow the bundled MustardOS muxlaunch item names.
+    patterns = {
+        "apps": [(12,12,16,16),(36,12,16,16),(12,36,16,16),(36,36,16,16)],
+        "favourite": [(10,18,44,30),(16,10,20,8),(24,30,16,8)],
+        "history": [(28,8,8,8),(16,16,8,8),(12,24,8,16),(20,40,12,8),(32,44,12,8),(44,32,8,16)],
+        "config": [(10,14,44,6),(10,29,44,6),(10,44,44,6),(20,10,6,14),(38,25,6,14),(26,40,6,14)],
+        "explore": [(28,8,8,8),(16,16,8,8),(40,16,8,8),(8,28,8,8),(48,28,8,8),(16,40,8,8),(40,40,8,8),(28,48,8,8)],
+        "info": [(22,10,20,12),(26,28,12,18),(22,48,20,6)],
+        "reboot": [(28,8,8,22),(16,12,8,6),(10,20,6,18),(16,40,8,8),(26,48,14,6),(40,40,8,8),(48,20,6,18),(40,12,8,6)],
+        "shutdown": [(28,8,8,24),(16,12,8,6),(10,20,6,18),(16,40,8,8),(26,48,14,6),(40,40,8,8),(48,20,6,18),(40,12,8,6)],
+    }
+    for name, blocks in patterns.items():
+        image = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(image)
+        for x, y, width, height in blocks:
+            draw.rectangle((x, y, x + width - 1, y + height - 1), fill=cream)
+        draw.rectangle((8, 58, 55, 61), fill=amber)
+        image.save(folder / f"{name}.png", format="PNG", optimize=True)
+
+
 def validate() -> None:
     for filename in ("name.txt", "version.txt", "credits.txt"):
         path = ROOT / filename
@@ -298,6 +328,7 @@ def main() -> None:
     prepare_wallpapers()
     write_png(PREVIEW, 288, 216, draw_preview())
     write_glyphs()
+    write_home_tile_art()
     write_wallpaper_videos()
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
