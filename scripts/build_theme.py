@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import configparser
 import struct
+import subprocess
 import zlib
 from pathlib import Path
 from PIL import Image, ImageOps
@@ -175,75 +176,48 @@ def draw_submenu_wallpaper() -> Image.Image:
     return image
 
 
-def draw_main_menu_icons() -> None:
-    """Generate full-size per-item PNG artwork used by muOS main-menu grid cells."""
-    from PIL import ImageDraw
-
-    icon_dir = IMAGE_WALL / "muxlaunch"
-    icon_dir.mkdir(parents=True, exist_ok=True)
-    colours = {
-        "explore": AMBER, "collection": CREAM, "history": AMBER, "apps": CREAM,
-        "info": AMBER, "config": CREAM, "reboot": AMBER, "shutdown": CREAM,
-    }
-    for name, colour in colours.items():
-        image = Image.new("RGBA", (96, 96), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(image)
-        # Chunky, high-contrast pictograms are deliberately PNG rather than SVG:
-        # muOS grid cells load per-item artwork from image/wall/muxlaunch/<item>.png.
-        if name == "explore":
-            draw.ellipse((22, 18, 66, 62), outline=colour, width=7)
-            draw.line((58, 58, 80, 80), fill=colour, width=8)
-        elif name == "collection":
-            draw.rounded_rectangle((17, 26, 79, 76), radius=4, outline=colour, width=6)
-            draw.line((28, 17, 68, 17), fill=colour, width=6)
-            draw.line((28, 10, 60, 10), fill=colour, width=5)
-        elif name == "history":
-            draw.arc((17, 17, 78, 78), start=35, end=320, fill=colour, width=7)
-            draw.polygon([(14, 24), (34, 22), (22, 41)], fill=colour)
-            draw.line((48, 31, 48, 49, 62, 57), fill=colour, width=6)
-        elif name == "apps":
-            for x, y in ((18, 18), (52, 18), (18, 52), (52, 52)):
-                draw.rounded_rectangle((x, y, x + 25, y + 25), radius=3, fill=colour)
-        elif name == "info":
-            draw.ellipse((16, 16, 80, 80), outline=colour, width=6)
-            draw.ellipse((43, 29, 52, 38), fill=colour)
-            draw.rounded_rectangle((42, 43, 54, 68), radius=3, fill=colour)
-        elif name == "config":
-            draw.ellipse((19, 19, 77, 77), outline=colour, width=7)
-            draw.ellipse((38, 38, 58, 58), outline=colour, width=6)
-            for x1, y1, x2, y2 in ((45, 8, 51, 24), (45, 72, 51, 88),
-                                    (8, 45, 24, 51), (72, 45, 88, 51),
-                                    (18, 18, 29, 29), (67, 67, 78, 78),
-                                    (18, 67, 29, 78), (67, 18, 78, 29)):
-                draw.line((x1, y1, x2, y2), fill=colour, width=6)
-        elif name in ("reboot", "shutdown"):
-            draw.arc((18, 18, 78, 78), start=40, end=320, fill=colour, width=7)
-            draw.line((48, 9, 48, 47), fill=colour, width=8)
-            if name == "shutdown":
-                draw.rectangle((42, 8, 54, 35), fill=(0, 0, 0, 0))
-                draw.line((48, 9, 48, 39), fill=colour, width=8)
-            else:
-                draw.polygon([(47, 5), (35, 22), (47, 19), (60, 22)], fill=colour)
-        image.save(icon_dir / f"{name}.png", optimize=True)
-
-
 def prepare_wallpapers() -> None:
     """Use the planet on the main menu and the original dark grid on submenu screens."""
     source = ROOT / "Pixel Planet Over a Misty Horizon.png"
     if not source.is_file():
         raise SystemExit(f"Source wallpaper missing: {source.name}")
     IMAGE_WALL.mkdir(parents=True, exist_ok=True)
-    draw_main_menu_icons()
     grid = draw_submenu_wallpaper()
     grid.save(IMAGE_WALL / "default.png", format="PNG", optimize=True)
     with Image.open(source) as artwork:
         artwork = ImageOps.fit(artwork.convert("RGB"), (WIDTH, HEIGHT),
                                method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
         artwork.save(IMAGE_WALL / "muxlaunch.png", format="PNG", optimize=True)
+    # Remove the misplaced full-size PNGs; muxlaunch icons belong in glyph/muxlaunch
+    # so muOS renders them inside each native grid tile.
+    icon_dir = IMAGE_WALL / "muxlaunch"
+    for item in ("explore", "collection", "history", "apps", "info", "config", "reboot", "shutdown"):
+        (icon_dir / f"{item}.png").unlink(missing_ok=True)
+    if icon_dir.exists() and not any(icon_dir.iterdir()):
+        icon_dir.rmdir()
     for module in MODULES:
         if module == "muxlaunch":
             continue
         grid.save(IMAGE_WALL / f"{module}.png", format="PNG", optimize=True)
+
+
+def write_wallpaper_videos() -> None:
+    """Preserve the existing muOS wallpaper video paths using the existing artwork."""
+    main_video = IMAGE_WALL / "muxlaunch.mp4"
+    background_video = RESOLUTION / "image" / "background.mp4"
+    background_video.parent.mkdir(parents=True, exist_ok=True)
+    common = [
+        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+        "-loop", "1", "-framerate", "12",
+    ]
+    options = [
+        "-t", "6", "-vf",
+        "drawbox=x='mod(t*10,640)':y=0:w=2:h=480:color=0xe8a84a@0.13:t=fill,format=yuv420p",
+        "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "30",
+        "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+    ]
+    subprocess.run(common + ["-i", str(IMAGE_WALL / "muxlaunch.png")] + options + [str(main_video)], check=True)
+    subprocess.run(common + ["-i", str(IMAGE_WALL / "default.png")] + options + [str(background_video)], check=True)
 
 
 def write_glyphs() -> None:
@@ -324,6 +298,7 @@ def main() -> None:
     prepare_wallpapers()
     write_png(PREVIEW, 288, 216, draw_preview())
     write_glyphs()
+    write_wallpaper_videos()
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     excluded_parts = {".git", ".github", "scripts", "dist", "__pycache__"}
@@ -349,10 +324,7 @@ def main() -> None:
             "name.txt", "version.txt", "credits.txt", "scheme/global.ini",
             "640x480/scheme/default.ini", "640x480/preview.png",
             "640x480/image/wall/default.png",
-            "640x480/image/wall/muxlaunch/apps.png", "640x480/image/wall/muxlaunch/collection.png",
-            "640x480/image/wall/muxlaunch/config.png", "640x480/image/wall/muxlaunch/explore.png",
-            "640x480/image/wall/muxlaunch/history.png", "640x480/image/wall/muxlaunch/info.png",
-            "640x480/image/wall/muxlaunch/reboot.png", "640x480/image/wall/muxlaunch/shutdown.png",
+            "640x480/image/wall/muxlaunch.mp4", "640x480/image/background.mp4",
             "640x480/glyph/muxlaunch/apps.svg", "640x480/glyph/muxlaunch/collection.svg",
             "640x480/glyph/muxlaunch/config.svg", "640x480/glyph/muxlaunch/explore.svg",
             "640x480/glyph/muxlaunch/history.svg", "640x480/glyph/muxlaunch/info.svg",
