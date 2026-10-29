@@ -221,63 +221,103 @@ def write_wallpaper_videos() -> None:
 
 
 def write_glyphs() -> None:
-    """Write filled, block-based pixel glyphs using the documented muOS filenames."""
-    glyph_root = RESOLUTION / "glyph" / "muxlaunch"
-    glyph_root.mkdir(parents=True, exist_ok=True)
-    # Filled rectangular blocks avoid thin SVG strokes disappearing in the grid renderer.
-    patterns = {
-        "apps": [(4,4,6,6),(14,4,6,6),(4,14,6,6),(14,14,6,6)],
-        "collection": [(3,6,18,3),(3,9,3,10),(6,16,12,3),(18,9,3,10),(7,3,8,3),(10,12,7,3)],
-        "config": [(3,4,18,3),(3,11,18,3),(3,18,18,3),(7,2,3,7),(14,9,3,7),(6,16,3,7)],
-        "explore": [(4,3,10,3),(2,6,3,9),(14,6,3,8),(5,15,9,3),(16,15,5,3),(17,17,3,4),(8,8,3,3),(11,11,3,3)],
-        "history": [(5,3,3,4),(2,6,5,3),(4,9,3,7),(7,16,4,3),(11,18,6,3),(17,15,3,4),(18,8,3,6),(12,5,3,8)],
-        "info": [(10,3,5,5),(10,10,5,8),(10,20,5,3)],
-        "reboot": [(10,2,5,10),(5,5,4,3),(3,8,3,7),(5,15,4,4),(9,18,7,3),(16,15,4,4),(18,8,3,7),(15,5,4,3)],
-        "shutdown": [(10,2,5,10),(5,5,4,3),(3,8,3,7),(5,15,4,4),(9,18,7,3),(16,15,4,4),(18,8,3,7),(15,5,4,3)],
+    """Generate crisp, block-based pixel glyphs for the main menu and secondary menus."""
+    # muOS resolves glyphs by module/item name. Keep all artwork in glyph/, never
+    # image/static/: static images are screen overlays and can appear in the centre.
+    modules = {
+        "muxlaunch": ("apps", "collection", "config", "explore", "history", "info", "reboot", "shutdown"),
+        "muxconfig": ("access", "backup", "colour", "connect", "core", "custom", "general", "interface", "power", "storage", "theme"),
+        "muxcustom": ("align", "alternate", "animation", "backgroundscale", "battery", "blackfade", "bluetooth", "boxart", "boxarthide", "boxartpadding", "boxartplaceholder", "boxartscale", "boxarttransition", "catalogue", "chime", "clock", "config", "content", "contentcollect", "contenthistory", "count", "dash", "displayemptyfolder", "elementtransition", "folderitemcount", "font", "fontname", "footerheight", "footersize", "forwardhistory", "friendlyfolder", "glyphfooter", "glyphgrid", "glyphheader", "glyphlist", "gridmodecontent", "groupcontent", "headerheight", "headersize", "headertitle", "hidden", "labelscrollspeed", "labelwidth", "launch_swap", "listglyph", "listsize", "logo", "menucounterfile", "menucounterfolder", "mixedcontent", "music", "musicvolume", "name", "namescroll", "network", "notifytime", "overlayimage", "overlaytransparency", "pageskip", "panelsize", "picklesstartupmessages", "randomtheme", "rendershadows", "resolution", "savescreenshot", "scaling", "selectionanimation", "selectionstyle", "shuffle", "sort", "sortorder", "sound", "soundvolume", "splash", "tagorder", "textscale", "theme", "themeopt", "thetitleformat", "titleincluderootdrive", "type"),
+        "muxplore": ("collection", "folder", "history", "rom"),
+        "muxapp": ("app", "archive", "dingux", "flip", "logo_2048", "moonlight", "music", "portmaster", "ppsspp", "retroarch", "rgbcontroller", "scummvm", "task", "terminal", "video", "vtree"),
+        "muxinfo": ("activity", "chrony", "credit", "detail", "news", "reload", "screenshot", "space", "tester", "third"),
+        "muxpower": ("battery", "gov_default", "gov_idle", "idle_display", "idle_mute", "idle_sleep", "saver_speed", "saver_type", "shutdown"),
+        "muxconnect": ("bluetooth", "link", "net_proxy", "netadv", "network", "service", "webcode"),
+        "muxstorage": ("apps", "bios", "catalogue", "collection", "history", "init", "launch", "manifest", "migrate_all", "music", "name", "network", "override", "package", "pickles", "profile", "purge_all", "save", "screenshot", "sync_all", "syncthing", "theme", "track", "wasabi"),
+        "muxhistory": ("collection", "history"),
+        "muxcollect": ("collection", "folder"),
+        "muxassign": ("core", "default", "download", "system"),
+        "muxnetwork": ("ethernet", "profile"),
+        "muxoption": ("colfilter", "control", "core", "folder", "governor", "launch", "name", "overlay", "remconfig", "retroarch", "search", "shader", "storage", "tag", "time"),
+        "muxpicker": ("catalogue", "config", "download", "folder", "theme"),
+        "muxtheme": ("download", "folder", "theme"),
+        "muxcontrol": ("default", "modern", "retro", "system"),
+        "muxarchive": ("archive", "installed"),
+        "muxrtc": ("custom", "day", "hour", "minute", "month", "notation", "timezone", "year"),
+        "muxlanguage": ("language",),
+        "muxaccess": ("boldfocus", "highcontrast", "legiblefont", "reducemotion", "textsize"),
+        "muxterm": ("background", "fonthinting", "fontsize", "foreground", "quit", "reset", "terminal"),
     }
-    for name, blocks in patterns.items():
-        # Use simple filled rect elements, matching the conservative SVG subset used by muOS glyphs.
-        rects = "".join(
-            f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="#F4F0E8"/>'
-            for x, y, w, h in blocks
-        )
-        svg = (
-            '<?xml version="1.0" encoding="UTF-8"?>'
-            '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" '
-            'viewBox="0 0 24 24" shape-rendering="crispEdges">'
-            f'{rects}</svg>'
-        )
-        (glyph_root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
-
-
-
-def write_home_tile_art() -> None:
-    """Use MustardOS's native per-item static artwork path for the main-menu grid."""
-    from PIL import ImageDraw
-
-    folder = RESOLUTION / "image" / "static" / "muxlaunch"
-    folder.mkdir(parents=True, exist_ok=True)
-    cream = (244, 240, 232, 255)
-    amber = (232, 168, 74, 255)
-
-    # Names follow the bundled MustardOS muxlaunch item names.
-    patterns = {
-        "apps": [(12,12,16,16),(36,12,16,16),(12,36,16,16),(36,36,16,16)],
-        "favourite": [(10,18,44,30),(16,10,20,8),(24,30,16,8)],
-        "history": [(28,8,8,8),(16,16,8,8),(12,24,8,16),(20,40,12,8),(32,44,12,8),(44,32,8,16)],
-        "config": [(10,14,44,6),(10,29,44,6),(10,44,44,6),(20,10,6,14),(38,25,6,14),(26,40,6,14)],
-        "explore": [(28,8,8,8),(16,16,8,8),(40,16,8,8),(8,28,8,8),(48,28,8,8),(16,40,8,8),(40,40,8,8),(28,48,8,8)],
-        "info": [(22,10,20,12),(26,28,12,18),(22,48,20,6)],
-        "reboot": [(28,8,8,22),(16,12,8,6),(10,20,6,18),(16,40,8,8),(26,48,14,6),(40,40,8,8),(48,20,6,18),(40,12,8,6)],
-        "shutdown": [(28,8,8,24),(16,12,8,6),(10,20,6,18),(16,40,8,8),(26,48,14,6),(40,40,8,8),(48,20,6,18),(40,12,8,6)],
+    # 5x5 bitmap alphabet of simple, recognizable symbols; each cell becomes a
+    # hard-edged rectangle, avoiding anti-aliased strokes at 640x480.
+    bitmaps = {
+        "apps": ("10101","10101","00000","10101","10101"),
+        "folder": ("11111","10000","11110","10010","11111"),
+        "config": ("00100","10101","01110","10101","00100"),
+        "explore": ("00100","10101","01110","00100","00100"),
+        "history": ("01110","10001","10111","10001","01110"),
+        "info": ("00100","00100","00100","00000","00100"),
+        "power": ("00100","10101","10001","11011","01110"),
+        "shutdown": ("00100","00100","10101","10001","01110"),
+        "collection": ("01010","11111","11111","01110","00100"),
+        "star": ("00100","10101","01110","11111","01010"),
+        "clock": ("01110","10001","10111","10001","01110"),
+        "battery": ("11111","10001","10101","10001","11111"),
+        "bluetooth": ("10010","11100","10110","11100","10010"),
+        "network": ("00100","01010","10101","01010","00100"),
+        "theme": ("01110","11011","10101","11011","01110"),
+        "storage": ("01110","10001","11111","10001","01110"),
+        "lock": ("01110","10001","11111","11011","11111"),
+        "document": ("11110","10010","10110","10010","11110"),
+        "search": ("01110","10001","10111","01100","00110"),
+        "download": ("00100","00100","10101","01110","00100"),
+        "link": ("01001","10010","00100","01001","10010"),
+        "music": ("00110","00101","00101","11101","11110"),
+        "font": ("00100","01010","11111","10001","10001"),
+        "screen": ("11111","10001","10101","10001","11111"),
+        "wifi": ("00100","01010","10001","00100","00100"),
+        "refresh": ("01110","10001","00110","01001","01110"),
+        "archive": ("11111","10001","10101","10001","11111"),
+        "game": ("10101","11111","11011","11111","10101"),
     }
-    for name, blocks in patterns.items():
-        image = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(image)
-        for x, y, width, height in blocks:
-            draw.rectangle((x, y, x + width - 1, y + height - 1), fill=cream)
-        draw.rectangle((8, 58, 55, 61), fill=amber)
-        image.save(folder / f"{name}.png", format="PNG", optimize=True)
+    def symbol_for(name: str) -> str:
+        key = name.lower()
+        if any(word in key for word in ("shutdown", "power", "reboot", "quit", "blackfade")): return "power"
+        if any(word in key for word in ("app", "bios", "package", "portmaster", "retroarch", "ppsspp", "scumm", "vtree", "dingux", "moonlight")): return "apps"
+        if any(word in key for word in ("folder", "directory", "catalogue", "collection", "pickles")): return "folder" if "folder" in key or "directory" in key else "collection"
+        if any(word in key for word in ("history", "last", "recent", "time", "clock", "hour", "minute", "day", "month", "year")): return "history" if "history" in key else "clock"
+        if any(word in key for word in ("config", "setting", "general", "interface", "governor", "control", "access", "custom", "align", "scale", "size", "sort", "order", "option", "animation")): return "config"
+        if any(word in key for word in ("explore", "search", "find", "filter", "rom", "launch", "core")): return "search"
+        if any(word in key for word in ("info", "detail", "credit", "news", "about", "third", "tester")): return "info"
+        if any(word in key for word in ("bluetooth", "link", "connect", "network", "wifi", "ethernet", "proxy", "service", "webcode")): return "bluetooth" if "bluetooth" in key else "network"
+        if any(word in key for word in ("battery", "power", "saver")): return "battery"
+        if any(word in key for word in ("theme", "colour", "color", "background", "overlay", "logo", "boxart", "splash")): return "theme"
+        if any(word in key for word in ("storage", "space", "save", "backup", "restore", "install", "download", "sync", "manifest", "archive")): return "storage" if "storage" in key or "space" in key else "download"
+        if any(word in key for word in ("font", "text", "label", "title", "name", "language")): return "font"
+        if any(word in key for word in ("music", "sound", "chime", "audio", "volume")): return "music"
+        if any(word in key for word in ("screen", "screenshot", "display", "resolution", "header", "footer", "panel", "glyph")): return "screen"
+        if any(word in key for word in ("retro", "game", "content", "shuffle", "play")): return "game"
+        if any(word in key for word in ("lock", "profile", "accessibility", "highcontrast", "hidden")): return "lock"
+        if any(word in key for word in ("refresh", "reload", "reset", "restore")): return "refresh"
+        return "document"
+
+    for module, names in modules.items():
+        glyph_root = RESOLUTION / "glyph" / module
+        glyph_root.mkdir(parents=True, exist_ok=True)
+        for name in names:
+            symbol = bitmaps[symbol_for(name)]
+            cells = []
+            for row, bits in enumerate(symbol):
+                for col, bit in enumerate(bits):
+                    if bit == "1":
+                        cells.append(f'<rect x="{3 + col * 4}" y="{3 + row * 4}" width="3" height="3" fill="#F4F0E8"/>')
+            # Tiny amber corner pixels give the set a consistent Omamu accent.
+            cells.append('<rect x="19" y="19" width="3" height="3" fill="#E8A84A"/>')
+            svg = ('<?xml version="1.0" encoding="UTF-8"?>'
+                   '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" '
+                   'viewBox="0 0 24 24" shape-rendering="crispEdges">'
+                   + ''.join(cells) + '</svg>')
+            (glyph_root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
 
 
 def validate() -> None:
@@ -328,7 +368,6 @@ def main() -> None:
     prepare_wallpapers()
     write_png(PREVIEW, 288, 216, draw_preview())
     write_glyphs()
-    write_home_tile_art()
     write_wallpaper_videos()
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
