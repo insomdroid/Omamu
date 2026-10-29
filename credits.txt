@@ -1,2 +1,3 @@
-Omamu theme design and generated artwork: insomdroid.
+Omamu theme design, schemes and generated artwork: insomdroid.
+Typeface: JetBrains Mono by JetBrains, licensed under the SIL Open Font License 1.1; license included in 640x480/font/OFL.txt.
 Original Omarchy-inspired design for muOS. Not affiliated with Omarchy or MustardOS.
