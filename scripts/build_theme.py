@@ -82,26 +82,108 @@ def rectangle(pixels: bytearray, width: int, x: int, y: int, w: int, h: int,
         line(pixels, width, x + w - 1, y, x + w - 1, y + h - 1, colour)
 
 
+def fill_polygon(pixels: bytearray, width: int, points: list[tuple[int, int]],
+                 colour: tuple[int, int, int]) -> None:
+    """Fill a polygon with hard pixel edges for a low-resolution pixel-art look."""
+    min_y = max(0, min(y for _, y in points))
+    max_y = min(len(pixels) // (width * 3) - 1, max(y for _, y in points))
+    for y in range(min_y, max_y + 1):
+        intersections = []
+        for i, (x1, y1) in enumerate(points):
+            x2, y2 = points[(i + 1) % len(points)]
+            if y1 == y2 or y < min(y1, y2) or y >= max(y1, y2):
+                continue
+            intersections.append(round(x1 + (y - y1) * (x2 - x1) / (y2 - y1)))
+        intersections.sort()
+        for i in range(0, len(intersections) - 1, 2):
+            for x in range(max(0, intersections[i]), min(width, intersections[i + 1] + 1)):
+                set_pixel(pixels, width, x, y, colour)
+
+
+def pixel_circle(pixels: bytearray, width: int, cx: int, cy: int, radius: int,
+                 colour: tuple[int, int, int], block: int = 4) -> None:
+    """Draw a chunky circle on the pixel grid."""
+    for y in range(cy - radius, cy + radius + 1, block):
+        for x in range(cx - radius, cx + radius + 1, block):
+            if (x - cx) ** 2 + (y - cy) ** 2 <= radius ** 2:
+                for oy in range(block):
+                    for ox in range(block):
+                        set_pixel(pixels, width, x + ox, y + oy, colour)
+
+
 def draw_wallpaper(module: str = "default") -> bytearray:
-    """Warm black, hairline grid, amber marker and subtle technical framing."""
+    """Pixel-art cyber valley, dark planetary horizon and restrained Omamu amber."""
     pixels = bytearray(WIDTH * HEIGHT * 3)
+    # Nearly-black sky with a subtle square grid and a low horizon glow.
     for y in range(HEIGHT):
-        lift = int(4 * (1 - y / (HEIGHT - 1)))
         for x in range(WIDTH):
+            lift = max(0, 9 - abs(y - 335) // 16)
             shade = (BG[0] + lift, BG[1] + lift, BG[2] + lift)
             if x % 32 == 0 or y % 32 == 0:
                 shade = (GRID[0] + lift, GRID[1] + lift, GRID[2] + lift)
-            # Quiet corner falloff gives the flat handheld screen a little depth.
-            edge = min(x, WIDTH - 1 - x, y, HEIGHT - 1 - y)
-            if edge < 10:
-                shade = tuple(max(0, channel - (10 - edge) // 2) for channel in shade)
             offset = (y * WIDTH + x) * 3
             pixels[offset:offset + 3] = bytes(shade)
 
-    # Keep wallpaper decoration behind the interface: no strokes cross list glyphs
-    # or imitate menu separators. The subdued grid remains the only texture.
-    return pixels
+    # Sparse pixel stars, intentionally kept out of the central menu-safe zone.
+    stars = [(93, 104, CREAM), (132, 132, MUTED), (214, 88, AMBER),
+             (284, 151, CREAM), (450, 92, CREAM), (521, 123, AMBER),
+             (565, 82, CREAM), (377, 176, MUTED), (62, 180, AMBER)]
+    for x, y, colour in stars:
+        rectangle(pixels, WIDTH, x, y, 2, 2, colour, True)
 
+    # Distant stepped mountains in charcoal, then foreground ridges in graphite.
+    fill_polygon(pixels, WIDTH, [(0, 326), (40, 298), (72, 313), (110, 277),
+        (148, 315), (190, 288), (230, 326), (274, 300), (318, 329),
+        (362, 294), (408, 322), (455, 286), (496, 316), (545, 279),
+        (590, 309), (639, 286), (639, 392), (0, 392)], (29, 29, 28))
+    fill_polygon(pixels, WIDTH, [(0, 352), (36, 326), (68, 340), (104, 307),
+        (140, 345), (179, 318), (218, 353), (259, 330), (299, 354),
+        (339, 326), (381, 354), (425, 321), (468, 351), (510, 319),
+        (554, 347), (600, 315), (639, 336), (639, 416), (0, 416)], (22, 23, 23))
+
+    # Pixelated eclipsed planet and a small amber rim on its right edge.
+    pixel_circle(pixels, WIDTH, 423, 258, 58, (36, 36, 34), 4)
+    pixel_circle(pixels, WIDTH, 418, 254, 51, (16, 16, 16), 4)
+    for y in range(208, 310, 4):
+        for x in range(460, 482, 4):
+            if (x - 423) ** 2 + (y - 258) ** 2 <= 58 ** 2 and (x - 418) ** 2 + (y - 254) ** 2 > 51 ** 2:
+                rectangle(pixels, WIDTH, x, y, 4, 4, AMBER, True)
+
+    # Far shoreline and angular amber reflections across still water.
+    line(pixels, WIDTH, 275, 352, 530, 352, (74, 54, 32), 1)
+    for i, (y, x1, x2) in enumerate([(365, 378, 470), (373, 394, 455),
+        (382, 382, 468), (392, 401, 449), (403, 388, 461),
+        (414, 402, 443), (425, 394, 456), (437, 408, 444)]):
+        colour = AMBER if i in (0, 2, 4, 6) else (96, 65, 31)
+        line(pixels, WIDTH, x1, y, x2, y, colour, 2 if i < 3 else 1)
+    fill_polygon(pixels, WIDTH, [(0, 385), (88, 379), (143, 398), (205, 413),
+        (267, 440), (322, 480), (0, 480)], (8, 9, 10))
+    fill_polygon(pixels, WIDTH, [(0, 396), (72, 390), (128, 410), (185, 430),
+        (233, 452), (270, 480), (0, 480)], (18, 19, 19))
+    # Pixel steps catch the light along the left cliff edge.
+    for x, y, w in [(34, 390, 16), (54, 397, 12), (69, 405, 18),
+                    (91, 414, 12), (108, 423, 16), (128, 433, 12),
+                    (145, 443, 16), (165, 454, 14), (185, 466, 13)]:
+        rectangle(pixels, WIDTH, x, y, w, 2, AMBER, True)
+
+    # Tiny windswept pixel tree on the cliff, a silhouette rather than a focal point.
+    fill_polygon(pixels, WIDTH, [(48, 366), (57, 337), (66, 324), (75, 328),
+        (86, 316), (97, 323), (108, 320), (98, 332), (85, 334),
+        (73, 342), (65, 359), (62, 379)], (7, 8, 8))
+    line(pixels, WIDTH, 61, 348, 80, 324, (9, 10, 10), 3)
+    line(pixels, WIDTH, 70, 339, 95, 329, (9, 10, 10), 2)
+    for x, y in [(82, 325), (92, 329), (72, 338), (58, 349)]:
+        rectangle(pixels, WIDTH, x, y, 3, 2, AMBER, True)
+
+    # Fine amber HUD marks only at the outer edges; the menu area stays uncluttered.
+    line(pixels, WIDTH, 24, 30, 24, 108, AMBER)
+    line(pixels, WIDTH, 24, 30, 62, 30, AMBER)
+    line(pixels, WIDTH, 616, 30, 616, 108, AMBER)
+    line(pixels, WIDTH, 578, 30, 616, 30, AMBER)
+    for y in (116, 124, 132):
+        rectangle(pixels, WIDTH, 24, y, 3, 3, AMBER, True)
+        rectangle(pixels, WIDTH, 613, y, 3, 3, AMBER, True)
+    return pixels
 
 def draw_preview() -> bytearray:
     """A legible miniature mock-up of the intended dark, amber muOS layout."""
@@ -146,10 +228,10 @@ def write_animated_wallpaper() -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     command = [
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-        "-f", "lavfi", "-i", "color=c=0x101010:s=640x480:r=12:d=6",
+        "-loop", "1", "-framerate", "12", "-i", str(IMAGE_WALL / "muxlaunch.png"),
+        "-t", "6",
         "-vf",
-        "drawgrid=width=32:height=32:thickness=1:color=0x1c1b18@0.72,"
-        "drawbox=x='mod(t*18,640)':y=0:w=2:h=480:color=0xe8a84a@0.16:t=fill,"
+        "drawbox=x='mod(t*10,640)':y=0:w=2:h=480:color=0xe8a84a@0.13:t=fill,"
         "format=yuv420p",
         "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "30",
         "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output),
