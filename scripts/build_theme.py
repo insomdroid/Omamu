@@ -324,7 +324,7 @@ def write_grid_icons() -> None:
         svg = ('<?xml version="1.0" encoding="UTF-8"?>'
                '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" '
                'viewBox="0 0 24 24" fill="#F4F0E8">'
-               '<g transform="translate(0 1.5)">' + artwork + '</g></svg>')
+               '<g transform="translate(0 0) scale(1)">' + artwork + '</g></svg>')
         (root / f"{name}.svg").write_text(svg + chr(10), encoding="utf-8")
 
 def validate() -> None:
