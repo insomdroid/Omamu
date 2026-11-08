@@ -72,3 +72,7 @@ For muOS theme format and scheme behaviour, see the official documentation:
 - [Scheme Files](https://muos.dev/themes/scheme)
 - [Glyph Gallery](https://muos.dev/themes/glyphs)
 - [Finishing a Theme](https://muos.dev/themes/finish)
+
+## Development workflow
+
+For the project-specific ChatGPT workflow, audit checklist, copy-ready prompts, and verification rules, see [CHATGPT_DEVELOPMENT_GUIDE.md](CHATGPT_DEVELOPMENT_GUIDE.md).
